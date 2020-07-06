@@ -216,7 +216,7 @@ static void CalcADCVolAverage(u8 ch, u32 adcode, u8 aver_max, u8 discard)
 		j = idx - discard*2;
 		temp /= j;
 		/*---------------- end -----------------*/
-		ad7124.vol[ch] = CalcADCVoltage(temp)*100; //计算电压 0.01mv		
+		ad7124.vol[ch] = CalcADCVoltage(temp)*100; //计算电压 0.01mv
 		AdcCodeAver[ch].idx = 0;
 	}
 }

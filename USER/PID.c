@@ -73,15 +73,10 @@ float PID_control(u8 id, s32 input_dat)
 	iError = 0;
 	dError = pPid->diff - 2*pPid->diff_last + pPid->diff_llast;
 	absdiff = abs(pPid->diff);
-	/*if(absdiff <= 10)	{
-		P = pPid->Kp*0.6;
-		I = pPid->Ki*0.5;
-		D = pPid->Kd*0.3;
-	}
-	else */if(absdiff <= 50)	{
-		P = pPid->Kp*0.6;
-		I = pPid->Ki*0.5;
-		D = pPid->Kd*0.6;
+	if(absdiff <= 50)	{
+		P = pPid->Kp*0.6f;
+		I = pPid->Ki*0.5f;
+		D = pPid->Kd*0.5f;
 	}
 	else	{
 		P = pPid->Kp;
@@ -91,25 +86,25 @@ float PID_control(u8 id, s32 input_dat)
 	if(pPid->increment> pPid->OutputMax) {//消除积分饱和
 		if(pPid->diff <= 0)
 			iError = pPid->diff;
+		dInput = input_dat - pPid->LastInput;
+		pPid->PIterm -= P * dInput;
+		PIterm = pPid->PIterm;
 	}
     else if(pPid->increment < pPid->OutputMin) {
 		if(pPid->diff >= 0)
 			iError = pPid->diff;
+		dInput = input_dat - pPid->LastInput;//误差大于1度 启用比例抑制 消除超调
+		pPid->PIterm -= P * dInput;
+		PIterm = pPid->PIterm;
 	}
-	else 
+	else {
 		iError = pPid->diff;
-//	if(pPid->increment > pPid->OutputMax)	{//误差大于1度 启用比例抑制 消除超调
-//		dInput = input_dat - pPid->LastInput;
-//		pPid->PIterm = -P * dInput;
-//		PIterm = pPid->PIterm;
-//	}
-//	else	{
-//		pPid->PIterm = 0;
+		pPid->PIterm = 0;
 		PIterm = P*pError;
-//	}
-//	pPid->LastInput = input_dat;//上次输入值	
-	pPid->increment += PIterm + I*iError + D*dError; 
-//	temp = pPid->Kp * pError + pPid->Ki * iError + pPid->Kd * dError;
+	}
+	pPid->LastInput = input_dat;//上次输入值	
+	pPid->increment += PIterm + I*iError + D*dError; //	temp = pPid->Kp * pError + pPid->Ki * iError + pPid->Kd * dError;
+
 	return pPid->increment;
 }
 #endif

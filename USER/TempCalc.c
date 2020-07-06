@@ -1219,14 +1219,14 @@ const static  TEMP_TABLE_T temp_table[TEMP_TABLE_LIST_SIZE] =
 
 static u32 config_temp_calculate_decimal(uint32_t max, uint32_t mix, uint32_t resistance)
 {
-    int i;
-    uint32_t step, resistance_1;
+    u8 i;
+    float step, resistance_1;
 
-    step = (max - mix) / 10;
+    step = (max - mix)*1.0f/10;
     for(i = 0; i < 10 + 1; i++)
     {
         resistance_1 = max - i * step;
-        if(resistance_1 < resistance )
+        if(resistance_1 <= resistance )
             return i;
     }
 
