@@ -36,15 +36,17 @@ static void DisDatInit(void)
 void StartSysLab(void)
 {
 	StartAPPTempCtrl();
-	StartAppADTask();
+//	StartAppADTask();
 	StartCollFluo();
 	Sys.devstate = DevState_Running;
+	Sys.devsubstate = DevSubState_TempUp;
 }
 
 void StopSysLab(void)
 {
 	Sys.devstate = DevState_IDLE;
-	StopAppADTask();
+	Sys.devsubstate = DevSubState_Unkown;
+//	StopAppADTask();
 	StopCollFluo();
 	StopAPPTempCtrl();
 }
@@ -402,7 +404,7 @@ static void ScreenDataProcess(_dacai_usart_t *pUsart)
 			strcpy(appdis.pUI->pdata, (const char *)(pUsart->rx_buf+pUsart->rx_idx));
 			temp = (int)(atof(appdis.pUI->pdata)*100);
 			if(appdis.pUI->ctrl_id == 8)	{//ÎÂ¶ÈÖµÉèÖÃ
-				if(temp > HOLE_TEMP_MAX||temp < HOLE_TEMP_MIN)
+				if(temp > HOLE_TEMPMAX||temp < HOLE_TEMPMIN)
 					DisplayMessageUI((char *)&Code_Message[3][0],1);
 				else	{
 					temp_data.stage[modify_stageid].step[modify_stepid].temp = temp;

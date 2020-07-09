@@ -218,45 +218,7 @@ _exit:
 	f_close(flashfs.fil);
 	return rsize;
 }
-
-//void WriteTempJsonFile(void)
-//{
-//	FRESULT res;
-//	char filepath[FILE_NAME_LEN];
-//	
-//	sprintf(filepath, "%s%s", USERPath, TEMPJSON_FILE_NAME);
-//	if(CreateTemp_Jsonfile(filepath)==0)	{
-//		SYS_PRINTF("write temp jsonfile ok");
-//	}
-//}
-
-//void ReadTempJsonFile(void)
-//{
-//	char filepath[FILE_NAME_LEN];
-//	
-//	sprintf(filepath, "%s%s", USERPath, TEMPJSON_FILE_NAME);
-//	AnalysisTemp_Jsonfile(filepath);
-//}
-
-//void WriteLabJsonFile(void)
-//{
-//	FRESULT res;
-//	char filepath[FILE_NAME_LEN];
-//	
-//	sprintf(filepath, "%s%s", USERPath, LabJSON_FILE_NAME);
-//	if(CreateLab_Jsonfile(filepath)==0)	{
-//		SYS_PRINTF("write lab jsonfile ok");
-//	}
-//}
-
-//void ReadLabJsonFile(void)
-//{
-//	char filepath[FILE_NAME_LEN];
-//	
-//	sprintf(filepath, "%s%s", USERPath, LabJSON_FILE_NAME);
-//	AnalysisLab_Jsonfile(filepath);
-//}
-//文件写入实验模板
+//文件写入一个实验到实验模板文件夹
 void WriteLabTemplate(void)
 {
 	FRESULT res;
@@ -264,16 +226,16 @@ void WriteLabTemplate(void)
 	char filepath[FILE_NAME_LEN];
 	
 	sprintf(filename, "%s%s/%s", USERPath, LabFolderName, lab_data.name);
-	res = f_mkdir((const char *)filename);
+	res = f_mkdir((const char *)filename);//创建实验名称文件夹
 	if(res==FR_OK || res==FR_EXIST)	{
 		sprintf(filepath, "%s/%s", filename, LabJSON_FILE_NAME);
-		if(CreateLab_Jsonfile((const char *)filepath)==0)	{
+		if(CreateLab_Jsonfile((const char *)filepath)==0)	{//创建实验json文件
 			SYS_PRINTF("write %s",filepath);
 		}
-		sprintf(filepath, "%s/%s", filename, TEMPJSON_FILE_NAME);
-		if(CreateTemp_Jsonfile((const char *)filepath)==0)	{
-			SYS_PRINTF("write %s",filepath);
-		}
+//		sprintf(filepath, "%s/%s", filename, TEMPJSON_FILE_NAME);
+//		if(CreateTemp_Jsonfile((const char *)filepath)==0)	{
+//			SYS_PRINTF("write %s",filepath);
+//		}
 	}
 	if(gLabTemplatelist.num>=LabTemplateMax)	{
 		DeleteLabTemplate(0);
@@ -351,7 +313,7 @@ void ReadLabTemplateList(void)
 		DeleteLabTemplate(0);		
 	}
 }
-
+//删除一个实验模板
 void DeleteLabTemplate(u8 item)
 {
 	FRESULT res;
@@ -359,16 +321,15 @@ void DeleteLabTemplate(u8 item)
 	
 	if(item>=gLabTemplatelist.num)
 		return;
-	sprintf(filedir, "%s%s/%s",USERPath, LabFolderName, gLabTemplatelist.list[item].name);
-	res = f_deldir((const char *)filedir);
+	sprintf(filedir, "%s%s/%s",USERPath, LabFolderName, gLabTemplatelist.list[item].name);//
+	res = f_deldir((const char *)filedir);//删除该实验文件夹内所有文件
 	if(res==FR_OK)	{
 		BSP_PRINTF("delete file: %s",filedir);
 		gLabTemplatelist.num -= 1;
 		
 	}
 }
-
-//解析实验模板 
+//解析实验模板数据
 int AnalysisLabTemplate(u8 item)
 {
 	int res;
@@ -380,12 +341,14 @@ int AnalysisLabTemplate(u8 item)
 	res = AnalysisLab_Jsonfile((const char *)filepath);
 	if(res==FR_OK)
 		BSP_PRINTF("analysis file: %s",filepath);
-	sprintf(filepath, "%s%s/%s/%s",USERPath, LabFolderName, gLabTemplatelist.list[item].name, TEMPJSON_FILE_NAME);
-	res = AnalysisTemp_Jsonfile((const char *)filepath);
-	if(res==FR_OK)
-		BSP_PRINTF("analysis file: %s",filepath);
+//	sprintf(filepath, "%s%s/%s/%s",USERPath, LabFolderName, gLabTemplatelist.list[item].name, TEMPJSON_FILE_NAME);
+//	res = AnalysisTemp_Jsonfile((const char *)filepath);
+//	if(res==FR_OK)
+//		BSP_PRINTF("analysis file: %s",filepath);
 	return res;
 }
+
+
 #include "PD_DataProcess.h"
 int WriteCalibrateRes(void)
 {

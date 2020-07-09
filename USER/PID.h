@@ -3,6 +3,13 @@
 
 #include "includes.h"
 
+#define	P1_PARAM		0.35f
+#define	I1_PARAM		0.01f
+#define	D1_PARAM		5.4f
+
+#define	P2_PARAM		0.35f
+#define	I2_PARAM		0.01f
+#define	D2_PARAM		5.4f
 typedef enum {
     PID_ID1      = 0,
     PID_ID2      = 1
@@ -24,16 +31,18 @@ typedef struct _PID{
 	float increment;
 	float PIterm;
     u8 issue_cnt;
+//	u8 enable;
 } _PID_t;
 
 extern _PID_t PID[PID_NUMS];
 void PIDParamInit(void);
 void SetPIDVal(u8 id, float P,float I,float D);
-void SetPIDTarget(u8 id, s32 data);
+u8 SetPIDTarget(u8 id, s32 data);
 void SetPIDOutputLimits(u8 id, s32 min, s32 max);
-float PID_control(u8 id, s32 input_dat);
+float PIDControl(u8 id, s32 input_dat);
+void StopPIDControl(u8 id);
 float GetPIDIncrement(u8 id);
 s32 GetPIDDiff(u8 id);
-void ClearPIDDiff(u8 id);
+//void ClearPIDDiff(u8 id);
 #endif
 

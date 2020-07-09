@@ -5,11 +5,11 @@
 #include "TempCalc.h"
 #include "PID.h"
 
-#define	HOLE_TEMP		0
-#define	COVER_TEMP		1
-
+enum temp_id	{
+	HOLE_ID = 0,
+	COVER_ID,
+};
 #define	TEMPCTRL_NUM		2//需要pid控制数量
-
 
 typedef struct _temp_ctrl	{
 	u8 PIDid;
@@ -17,7 +17,9 @@ typedef struct _temp_ctrl	{
 	u8 TimCH;
 	u16 TimPluse;
 	u8 DutyMax;
-//	s16 target_t;//目标温度 0.1
+	u8 enable;//目标温度 0.1
+	s16 TempMax;
+	s16 TempMin;
 //	float PIDParam;//tec pwm占空比
 }temp_ctrl_t;
 
@@ -32,7 +34,9 @@ typedef struct _app_temp	{
 void AppTempInit (void);
 u8 StartAPPTempCtrl(void);
 void StopAPPTempCtrl(void);
+void SetTempCtrlTarget(u8 id, s16 temp);
+void StopTempCtrl(u8 id);
 s16 GetCoverTemperature(void);
-s16 GetHoleTemperature(void);
+s16 GetHoleTemperature(u8 hole);
 #endif
 

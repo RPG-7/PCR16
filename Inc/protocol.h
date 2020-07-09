@@ -67,6 +67,7 @@ typedef enum {
 	_CMD_ReadFlashSpace	= 0x12,//获取存储信息
 	_CMD_SetTemp	= 0x13,//设置模块温度
 	_CMD_GetTemp	= 0x14,//读取模块温度
+	_CMD_GetFluo	= 0x15,//获取荧光数据
 	_CMD_SetPIDVal	= 0xE0,//PID参数设置
 	_CMD_ACK	= 0XFA,//ack cmd
 } EMessageCmd;

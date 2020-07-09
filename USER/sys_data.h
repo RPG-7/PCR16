@@ -9,17 +9,22 @@
 #include "timestamp.h"
 
 #define	FILE_NAME_LEN		50
-#define	LOG_FILE_NAME		"Pcr16Log.txt"//"PerfusionLog.txt"
-#define	TEMPJSON_FILE_NAME		"Temp.json"
+#define	LOG_FILE_NAME		"PCRLog.txt"//"PerfusionLog.txt"
+//#define	TEMPJSON_FILE_NAME		"Temp.json"
 #define	LabJSON_FILE_NAME		"Lab.json"
 #define	CALI_FILE_NAME		"calibrate"
 
-#define	LabFolderName		"Lab"
-#define	DataFolderName		"Data"
-#define	TmpFolderName		"tmp"
+#define	LabFolderName		"Lab"//实验文件夹 保存最新的5次实验配置信息
+#define	DataFolderName		"Data"//数据文件夹 保存最新的50条实验数据 包括配置信息和荧光数据
+#define	TmpFolderName		"Tmp"//临时文件夹 其它临时文件
+#define	ServerLabFolderName		"Tmp/Lab"//保存上位机设置的实验配置信息+荧光数据(只保存一个) 
 
-#define	HEATCOVER_TEMPMAX		110
-#define	HEATCOVER_TEMPMIN		30
+#define	HOLE_TEMPMAX		10000//模块孔温度控制范围 10-100
+#define	HOLE_TEMPMIN		100
+#define	HOLE_TEMPDEFAULT		9500
+#define	HEATCOVER_TEMPMAX		11000//热盖温度控制范围 0-110
+#define	HEATCOVER_TEMPMIN		-4000
+#define	HEATCOVER_TEMPDEFAULT		10500
 
 #define SysState_None							0
 #define SysState_Standby					DEF_BIT00_MASK
@@ -33,8 +38,10 @@
 #define SysState_AddStep					DEF_BIT08_MASK
 #define SysState_AddStage				DEF_BIT09_MASK
 #define SysState_UpdataFWTB				DEF_BIT10_MASK
-#define SysState_CaliHolePostion				DEF_BIT11_MASK
-#define SysState_CollHolePD			DEF_BIT12_MASK
+#define SysState_CaliHolePostion		DEF_BIT11_MASK
+#define SysState_CollHolePD				DEF_BIT12_MASK
+#define SysState_LabFromServer			DEF_BIT13_MASK//来自上位机的实验
+#define SysState_CoverTempOk			DEF_BIT14_MASK//热盖温度已经稳定
 //设备运行模式
 enum devstate	{
 	DevState_IDLE=0,//待机模式
@@ -45,10 +52,13 @@ enum devstate	{
 	DevState_Debug,
 };
 //设备运行子模式
-enum devsubstate	{	
-	DevSubState_Fluo=3,//荧光采集中
-	DevSubState_DebugTemp=4,
-	DevSubState_Unkown=0xff,//未知
+enum devsubstate	{
+	DevSubState_TempUp=0,//温度上升中
+	DevSubState_TempDown=1,//温度下降中
+	DevSubState_TempKeep=2,//温度保持中
+	DevSubState_CollectFluo=3,//荧光采集中
+	DevSubState_DebugTemp = 4,
+    DevSubState_Unkown=0xFF,//未知
 };
 
 enum lab_type	{
@@ -97,8 +107,8 @@ typedef struct _sys	{
 #define	LAB_NAME_LEN		16
 #define	HOLE_NUM		16
 #define	STAGE_REPEAT_MAX		100
-#define	HOLE_TEMP_MAX		9500//95度 0.01
-#define	HOLE_TEMP_MIN		100//1度 
+//#define	HOLE_TEMP_MAX		9500//95度 0.01
+//#define	HOLE_TEMP_MIN		100//1度 
 typedef struct _step	{
 	u8 CollEnable;//采集使能
 	s16 temp;

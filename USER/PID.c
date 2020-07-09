@@ -1,6 +1,5 @@
 #include "PID.h"
 
-
 _PID_t PID[PID_NUMS];
 void PIDParamInit(void)
 {	
@@ -18,11 +17,24 @@ void SetPIDVal(u8 id, float P,float I,float D)
 //	ClearPIDDiff(id);
 }
 //设置pid控制目标
-void SetPIDTarget(u8 id, s32 data)
+u8 SetPIDTarget(u8 id, s32 data)
 {
-	_PID_t *pPid = &PID[id];
+	_PID_t *pPid;
 	
+	if(id == PID_ID1)	{
+		if(data<HOLE_TEMPMIN || data>HOLE_TEMPMAX)	
+			return 0;
+	}
+	else if(id == PID_ID2)	{
+		if(data<HEATCOVER_TEMPMIN || data>HEATCOVER_TEMPMAX)
+			return 0;
+	}
+	else 
+		return 0;
+	pPid = &PID[id];
 	pPid->Target = data;
+//	pPid->enable = DEF_True;
+	return 1;
 }
 
 void SetPIDOutputLimits(u8 id, s32 min, s32 max)
@@ -40,7 +52,7 @@ void SetPIDOutputLimits(u8 id, s32 min, s32 max)
 //2. 运行过程可以更改PID参数，让计算结果不会产生剧烈变化：用复合积分项变量替换偏差求和变量，对 Ki * 偏差 求和
 //3. 钳位积分项和输出, 消除积分饱和
 //PID控制 设置值：set_dat  实际值：input_dat
-float PID_control(u8 id, s32 input_dat)
+float PIDControl(u8 id, s32 input_dat)
 {
 	s32 dInput;
 	_PID_t *pPid = &PID[id];
@@ -59,13 +71,15 @@ float PID_control(u8 id, s32 input_dat)
 }
 #else
 //增量法计算公式：Pdlt=Kp*(e(t)-e(t-1))+Ki*e(t)+Kd*(e(t)-2*e(t-1)+e(t-2));
-float PID_control(u8 id, s32 input_dat)
+float PIDControl(u8 id, s32 input_dat)
 {
 	_PID_t *pPid = &PID[id];
 	s32 pError,iError,dError;
 	float P,I,D,PIterm;
 	s32 dInput,absdiff;
 	
+//	if(pPid->enable==DEF_False)
+//		return 0;
 	pPid->diff_llast = pPid->diff_last;// 上上次误差
 	pPid->diff_last = pPid->diff;// 上次误差
 	pPid->diff = pPid->Target - input_dat;// 本次误差
@@ -108,10 +122,11 @@ float PID_control(u8 id, s32 input_dat)
 	return pPid->increment;
 }
 #endif
-void ClearPIDDiff(u8 id)
+void StopPIDControl(u8 id)
 {
 	_PID_t *pPid = &PID[id];
 	
+//	pPid->enable = DEF_False;
 	pPid->diff = 0;
 	pPid->diff_last = 0;
 	pPid->diff_llast = 0;

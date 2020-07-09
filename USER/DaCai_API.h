@@ -66,7 +66,7 @@ void  DaCai_DisplayCutPic(u16 x, u16 y, u8 Image_ID, u16 Image_X, u16 Image_Y, u
 void  DaCai_DisplayCutPicInBasicGraph(_UI_t *pUI, u8 Image_ID, u16 x, u16 y, u16 Image_X, u16 Image_Y, u16 Image_W, u16 Image_H);
 void DaCai_PaintLine(_coordinate_t *pCoo, u8 size);
 void DaCai_PaintLineInBasicGraph(_UI_t *pUI, u16 color, _coordinate_t *pCoo, u8 size);
-u8  DaCai_ClearBasicGraph(_UI_t *pUI);
+void  DaCai_ClearBasicGraph(_UI_t *pUI);
 void DaCai_IconCtrl(_UI_t *pUI, u8 icon);
 void DaCai_PaintHollowRectangle(u16 x, u16 y, u16 w, u16 h);
 void DaCai_DisplayUpdateOnOff(u8 flag);

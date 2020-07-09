@@ -32,43 +32,49 @@ u8 UsartCmdProcess(usart_t *pUsart, message_pkt_t msg[])
 			break;
 		case _CMD_READ_RunningLabName://0X04,//读取当前实验名称
 			if(Sys.devstate == DevState_Running||Sys.devstate == DevState_Pause)	{
-				strcpy((char *)data_buf,lab_data.name);				
+				if(Sys.state & SysState_LabFromServer)//当前实验来自上位机
+					data_buf[0] = LabTypeNone+2;
+				else//当前实验由下位机自建
+					data_buf[0] = LabTypeNone+1;
+				strcpy((char *)data_buf,lab_data.name);
+				idx = strlen((char *)data_buf) + 1;
 			}
 			else	{
-				strcpy((char *)data_buf,"NONE");
-			}		
+				data_buf[0] = LabTypeNone;//当前无实验运行
+				idx = 1;
+			}
 			msg[1].Data = data_buf;
-			msg[1].dLen = strlen((char *)data_buf);
+			msg[1].dLen = idx;
 			OSMboxPost(usart.mbox, &msg[1]);
 			break;
-		case _CMD_READ_RunningLabData://0X05,//读取当前实验数据
+		case _CMD_READ_RunningLabData://0X05,//读取当前实验运行数据
 		{
-//			u8 m,n;
-//			
-//			idx = 0;
-//			m = temp_data.CurStage;
-//			n = temp_data.stage[m].CurStep;
-//			data_buf[idx++] = m<<4 | (n&0x0f);//当前stage 和 step
-//			data_buf[idx++] = temp_data.stage[data].CurRepeat;//当前repeat
-//			temp = (u16)app_temp.current_t[TEMP_ID3];//热盖温度
-//			memcpy(data_buf+idx,(u8 *)&temp, 2);
-//			idx += 2;
-//			temp = (u16)app_temp.current_t[TEMP_ID1];//模块温度1
-//			memcpy(data_buf+idx,(u8 *)&temp, 2);
-//			idx += 2;
-//			temp = (u16)app_temp.current_t[TEMP_ID2];//模块温度2
-//			memcpy(data_buf+idx,(u8 *)&temp, 2);
-//			idx += 2;
-//			data_buf[idx++] = temp_data.stage[m].step[n].tim/60;
-//			data_buf[idx++] = temp_data.stage[m].step[n].tim%60;
-//			data_buf[idx++] = HOLE_NUM;
-//			memcpy(data_buf+idx,(u8 *)gPD_Data.PDVol,sizeof(gPD_Data.PDVol));
-//			idx += sizeof(gPD_Data.PDVol);
-//			msg[1]->Data = data_buf;
-//			msg[1]->dLen = idx;
-//			OSMboxPost(usart.mbox, &msg[1]);
+			u8 m,n;
+			
+			idx = 0;
+			m = temp_data.CurStage;//当前实验阶段
+			n = temp_data.stage[m].CurStep;//当前实验步骤
+			data_buf[idx++] = m<<4 | (n&0x0f);//当前stage 和 step
+			data_buf[idx++] = temp_data.stage[data].CurRepeat;//当前实验循环repeat
+			temp = (u16)GetCoverTemperature();//热盖温度
+			memcpy(data_buf+idx,(u8 *)&temp, 2);
+			idx += 2;
+			temp = (u16)GetHoleTemperature(1);//模块温度
+			memcpy(data_buf+idx,(u8 *)&temp, 2);
+			idx += 2;
+			temp = (u16)GetHoleTemperature(2);//模块温度2
+			memcpy(data_buf+idx,(u8 *)&temp, 2);
+			idx += 2;
+			data_buf[idx++] = temp_data.stage[m].step[n].tim/60;
+			data_buf[idx++] = temp_data.stage[m].step[n].tim%60;
+			msg[1].Data = data_buf;
+			msg[1].dLen = idx;
+			OSMboxPost(usart.mbox, &msg[1]);
 			break;
 		}
+		case _CMD_GetFluo://0x15,//获取荧光数据
+			
+			break;
 		case _CMD_READ_SysError://0X06,//读取故障
 			break;
 		case _CMD_SET_LabState://0X07,//设置实验启停
@@ -203,9 +209,9 @@ u8 UsartCmdProcess(usart_t *pUsart, message_pkt_t msg[])
 			data = UsartRxGetINT8U(pUsart->rx_buf,&pUsart->rx_idx);
 			temp = (s16)UsartRxGetINT16U(pUsart->rx_buf,&pUsart->rx_idx);
 			if(iPara==0)	{//控制模块温度			
-				SetPIDTarget(PID_ID1, temp);
+				SetTempCtrlTarget(HOLE_ID, temp);
 			}else if(iPara==1)	{//控制热盖温度
-				SetPIDTarget(PID_ID2, temp);
+				SetTempCtrlTarget(COVER_ID, temp);
 			}
 			if(data==0)	{//停止
 				Sys.devstate = DevState_IDLE;
@@ -219,7 +225,7 @@ u8 UsartCmdProcess(usart_t *pUsart, message_pkt_t msg[])
 		case _CMD_GetTemp://0x14,//读取模块温度
 			iPara = UsartRxGetINT8U(pUsart->rx_buf,&pUsart->rx_idx);
 			if(iPara==0)	{//读取模块温度	
-				temp = GetHoleTemperature();				
+				temp = GetHoleTemperature(1);				
 			}
 			else if(iPara==1)	{//读取热盖温度
 				temp = GetCoverTemperature();

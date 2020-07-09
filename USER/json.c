@@ -1,7 +1,7 @@
 #include "json.h"
 
 json_error_t *jsonerror;
-json_t *jdata,*jsubdata;
+json_t *jdata,*jsubdata,*jsubdata1;
 char *json_out;
 
 void jansson_init(void)
@@ -9,17 +9,68 @@ void jansson_init(void)
 	json_set_alloc_funcs(user_malloc, user_free);
 }
 
-//创建温度曲线json文件
-int CreateTemp_Jsonfile(const char *path)
+////创建温度曲线json文件
+//static int CreateTemp_Jsonfile(const char *path)
+//{
+//	json_t *jarr,*jarr1,*jarr2,*jval;
+//	u8 i,j;
+//	int ret;
+
+////	jdata = json_object();
+//	jarr = json_array();
+//	jdata = json_pack("{si}", /*"Enable", temp_data.HeatCoverEnable,*/"HeatCoverTemp", temp_data.HeatCoverTemp);
+////	json_object_set(jdata,"HeatCover",jsubdata);
+
+//	for(i=0;i<temp_data.StageNum;i++)	{
+//		jarr2 = json_array();
+//		jsubdata = json_pack("{si}", "Type",temp_data.stage[i].Type);
+//		for(j=0;j<temp_data.stage[i].StepNum;j++)	{
+//			jarr1 = json_array();
+//			jval = json_integer( temp_data.stage[i].step[j].temp );
+//			json_array_append_new( jarr1, jval );
+//			jval = json_integer( temp_data.stage[i].step[j].tim );
+//			json_array_append_new( jarr1, jval );
+//			jval = json_integer( temp_data.stage[i].step[j].CollEnable );
+//			json_array_append_new( jarr1, jval );
+//			json_array_append_new( jarr2, jarr1 );
+//		}
+//		json_object_set_new(jsubdata, "Step", jarr2);
+//		if(temp_data.stage[i].Type==StageByRepeat)
+//			json_object_set_new(jsubdata, "Repeat", json_integer(temp_data.stage[i].RepeatNum));
+//		else if(temp_data.stage[i].Type==StageByContinue)//溶解曲线
+//			json_object_set_new(jsubdata, "T_Rate", json_integer(temp_data.stage[i].T_Rate));
+//		else if(temp_data.stage[i].Type==StageByContinue)	{//溶解曲线
+//			json_object_set_new(jsubdata, "T_Inter", json_integer(temp_data.stage[i].T_Inter));
+//			json_object_set_new(jsubdata, "Const_Tim", json_integer(temp_data.stage[i].Const_Tim));
+//		}
+//		json_array_append_new( jarr, jsubdata );
+//	}
+//	json_object_set(jdata,"Stage",jarr);
+//		
+////	json_out = json_dumps(jdata, JSON_INDENT(1)|JSON_PRESERVE_ORDER|JSON_ENSURE_ASCII);
+////	SYS_PRINTF("out:%s", json_out);
+////	user_free(json_out);
+//	ret = json_dump_file(jdata, path, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
+//	json_decref(jdata);
+//	json_decref(jsubdata);
+
+//	return ret;
+//}
+
+//创建lab json文件
+int CreateLab_Jsonfile(const char *path)
 {
 	json_t *jarr,*jarr1,*jarr2,*jval;
 	u8 i,j;
 	int ret;
-
-//	jdata = json_object();
+	
+	jdata = json_object();	
+	//实验属性
+	jsubdata = json_pack_ex(jsonerror,0,"{ss,ss,si,si,si}", "id", lab_data.id,"name",lab_data.name,"type",lab_data.type,"method",lab_data.method,"HoleNum",HOLE_NUM);
+	json_object_set(jdata,"Lab",jsubdata);
+	//温度程序
 	jarr = json_array();
-	jdata = json_pack("{si}", /*"Enable", temp_data.HeatCoverEnable,*/"HeatCoverTemp", temp_data.HeatCoverTemp);
-//	json_object_set(jdata,"HeatCover",jsubdata);
+	jsubdata1 = json_pack("{si}", "HeatCover", temp_data.HeatCoverTemp);
 
 	for(i=0;i<temp_data.StageNum;i++)	{
 		jarr2 = json_array();
@@ -45,35 +96,12 @@ int CreateTemp_Jsonfile(const char *path)
 		}
 		json_array_append_new( jarr, jsubdata );
 	}
-	json_object_set(jdata,"Stage",jarr);
-		
-//	json_out = json_dumps(jdata, JSON_INDENT(1)|JSON_PRESERVE_ORDER|JSON_ENSURE_ASCII);
-//	SYS_PRINTF("out:%s", json_out);
-//	user_free(json_out);
-	ret = json_dump_file(jdata, path, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
-	json_decref(jdata);
-	json_decref(jsubdata);
-
-	return ret;
-}
-
-//创建lab json文件
-int CreateLab_Jsonfile(const char *path)
-{
-	json_t *jarr;
-	u8 i;
-	int ret;
-	
-	jdata = json_object();
-	jarr = json_array();
-	
-	jsubdata = json_pack_ex(jsonerror,0,"{ss,ss,si,si,si}", "id", lab_data.id,"name",lab_data.name,"type",lab_data.type,"method",lab_data.method,"HoleNum",HOLE_NUM);
-	json_object_set(jdata,"Lab",jsubdata);
+	json_object_set_new(jsubdata1, "Stage",jarr);
+	json_object_set(jdata,"Temp",jsubdata1);
+	//样本信息
 	for(i=0;i<HOLE_NUM;i++)	{
 		if(sample_data.hole[i].sample_t[0] != 0)	
 		{
-//			jsubdata = json_pack_ex(jsonerror,0,"{si,ss,ss,ss,ss}", "ID", i+1,"name",sample_data.hole[i].name,"prj",sample_data.hole[i].prj,\
-//						"sample",&sample_data.hole[i].sample_t,"ch",sample_data.hole[i].channel);
 			jsubdata = json_pack_ex(jsonerror,0,"{si,ss,ss}", "ID", i, "name",sample_data.hole[i].name, "prj",sample_data.hole[i].prj);	
 			json_object_set_new(jsubdata, "sample", json_string((const char *)sample_data.hole[i].sample_t));
 			json_object_set_new(jsubdata, "ch", json_string(sample_data.hole[i].channel));
@@ -81,74 +109,71 @@ int CreateLab_Jsonfile(const char *path)
 		}
 	}
 	json_object_set(jdata,"Hole",jarr);
-	
-//	json_out = json_dumps(jdata, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
-//	SYS_PRINTF("json_out:%s", out);
-//	user_free(json_out);
 	ret = json_dump_file(jdata, path, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
 	json_decref(jdata);
 	json_decref(jsubdata);
-
+	json_decref(jsubdata1);
 	return ret;
 }
 //解析温度曲线json文件
-int AnalysisTemp_Jsonfile(const char *path)
-{
-	json_t *jtmp,*jtmp2,*jtmp3;
-	u8 i,j;
+//int AnalysisTemp_Jsonfile(const char *path)
+//{
+//	json_t *jtmp,*jtmp2,*jtmp3;
+//	u8 i,j;
 
-	jdata = json_load_file(path, JSON_DECODE_ANY, jsonerror);
-	jsubdata = json_object_get((const json_t *)jdata,"HeatCoverTemp");
-	if(jsubdata!=NULL && json_is_object(jsubdata))	{
-//		jtmp = json_object_get(jsubdata,"Enable");
-//		temp_data.HeatCoverEnable = json_integer_value(jtmp);			
-//		jtmp = json_object_get(jsubdata,"Temp");
-		temp_data.HeatCoverTemp = json_integer_value(jsubdata);			
-	}
-	json_decref(jsubdata);
-	jsubdata = json_object_get((const json_t *)jdata,"Stage");
-	if(jsubdata!=NULL && json_is_array(jsubdata))	{
-		temp_data.StageNum = json_array_size(jsubdata);
-		for(i=0;i<temp_data.StageNum;i++)	{
-			jtmp2 = json_array_get(jsubdata, i);
-			jtmp = json_object_get(jtmp2,"Type");
-			temp_data.stage[i].Type = json_integer_value(jtmp);					
-			jtmp3 = json_object_get(jtmp2,"Step");
-			temp_data.stage[i].StepNum = json_array_size(jtmp3);
-			for(j=0;j<temp_data.stage[i].StepNum;j++)	{
-				jtmp = json_array_get(jtmp3, j);
-				temp_data.stage[i].step[j].temp = json_integer_value(json_array_get(jtmp, 0));
-				temp_data.stage[i].step[j].tim = json_integer_value(json_array_get(jtmp, 1));
-				temp_data.stage[i].step[j].CollEnable = json_integer_value(json_array_get(jtmp, 2));
-				json_decref(jtmp);
-			}
-			
-			if(temp_data.stage[i].Type==StageByRepeat)	{
-				temp_data.stage[i].RepeatNum = json_integer_value(json_object_get(jtmp2,"Repeat"));
-			}
-			else if(temp_data.stage[i].Type==StageByContinue)	{//溶解曲线
-				temp_data.stage[i].T_Rate = json_integer_value(json_object_get(jtmp2,"T_Rate"));
-			}
-			else if(temp_data.stage[i].Type==StageByContinue)	{//溶解曲线
-				temp_data.stage[i].T_Inter = json_integer_value(json_object_get(jtmp2,"T_Inter"));
-				temp_data.stage[i].Const_Tim = json_integer_value(json_object_get(jtmp2,"Const_Tim"));
-			}
-		}
-		json_decref(jdata);
-		json_decref(jsubdata);
-		return 0;
-	}
-	return -1;
-}
+//	jdata = json_load_file(path, JSON_DECODE_ANY, jsonerror);
+//	jsubdata = json_object_get((const json_t *)jdata,"HeatCoverTemp");
+//	if(jsubdata!=NULL && json_is_object(jsubdata))	{
+////		jtmp = json_object_get(jsubdata,"Enable");
+////		temp_data.HeatCoverEnable = json_integer_value(jtmp);			
+////		jtmp = json_object_get(jsubdata,"Temp");
+//		temp_data.HeatCoverTemp = json_integer_value(jsubdata);			
+//	}
+//	json_decref(jsubdata);
+//	jsubdata = json_object_get((const json_t *)jdata,"Stage");
+//	if(jsubdata!=NULL && json_is_array(jsubdata))	{
+//		temp_data.StageNum = json_array_size(jsubdata);
+//		for(i=0;i<temp_data.StageNum;i++)	{
+//			jtmp2 = json_array_get(jsubdata, i);
+//			jtmp = json_object_get(jtmp2,"Type");
+//			temp_data.stage[i].Type = json_integer_value(jtmp);					
+//			jtmp3 = json_object_get(jtmp2,"Step");
+//			temp_data.stage[i].StepNum = json_array_size(jtmp3);
+//			for(j=0;j<temp_data.stage[i].StepNum;j++)	{
+//				jtmp = json_array_get(jtmp3, j);
+//				temp_data.stage[i].step[j].temp = json_integer_value(json_array_get(jtmp, 0));
+//				temp_data.stage[i].step[j].tim = json_integer_value(json_array_get(jtmp, 1));
+//				temp_data.stage[i].step[j].CollEnable = json_integer_value(json_array_get(jtmp, 2));
+//				json_decref(jtmp);
+//			}
+//			
+//			if(temp_data.stage[i].Type==StageByRepeat)	{
+//				temp_data.stage[i].RepeatNum = json_integer_value(json_object_get(jtmp2,"Repeat"));
+//			}
+//			else if(temp_data.stage[i].Type==StageByContinue)	{//溶解曲线
+//				temp_data.stage[i].T_Rate = json_integer_value(json_object_get(jtmp2,"T_Rate"));
+//			}
+//			else if(temp_data.stage[i].Type==StageByContinue)	{//溶解曲线
+//				temp_data.stage[i].T_Inter = json_integer_value(json_object_get(jtmp2,"T_Inter"));
+//				temp_data.stage[i].Const_Tim = json_integer_value(json_object_get(jtmp2,"Const_Tim"));
+//			}
+//		}
+//		json_decref(jdata);
+//		json_decref(jsubdata);
+//		return 0;
+//	}
+//	return -1;
+//}
 
 //解析温lab json文件
 int AnalysisLab_Jsonfile(const char *path)
 {
-	json_t *jtmp=NULL;
+	json_t *jtmp,*jtmp2,*jtmp3;
 	u8 i,j;
 	u16 total;
 
 	jdata = json_load_file(path, JSON_DECODE_ANY, jsonerror);
+	//解析实验属性
 	jsubdata = json_object_get((const json_t *)jdata,"Lab");
 	if(jsubdata!=NULL && json_is_object(jsubdata))	{
 		strcpy(lab_data.id, json_string_value(json_object_get(jsubdata,"id")));
@@ -158,6 +183,47 @@ int AnalysisLab_Jsonfile(const char *path)
 //		lab_data. = json_integer_value(json_object_get(jsubdata,"HoleNum"));
 	}
 	json_decref(jsubdata);
+	//解析温度程序
+	jsubdata1 = json_object_get(jdata,"Temp");
+	if(jsubdata1!=NULL && json_is_object(jsubdata1))	{
+		jsubdata = json_object_get((const json_t *)jsubdata1,"HeatCover");
+		if(jsubdata!=NULL && json_is_object(jsubdata))	{
+			temp_data.HeatCoverTemp = json_integer_value(jsubdata);			
+		}
+		json_decref(jsubdata);
+		jsubdata = json_object_get((const json_t *)jsubdata1,"Stage");
+		if(jsubdata!=NULL && json_is_array(jsubdata))	{
+			temp_data.StageNum = json_array_size(jsubdata);
+			for(i=0;i<temp_data.StageNum;i++)	{
+				jtmp2 = json_array_get(jsubdata, i);
+				jtmp = json_object_get(jtmp2,"Type");
+				temp_data.stage[i].Type = json_integer_value(jtmp);					
+				jtmp3 = json_object_get(jtmp2,"Step");
+				temp_data.stage[i].StepNum = json_array_size(jtmp3);
+				for(j=0;j<temp_data.stage[i].StepNum;j++)	{
+					jtmp = json_array_get(jtmp3, j);
+					temp_data.stage[i].step[j].temp = json_integer_value(json_array_get(jtmp, 0));
+					temp_data.stage[i].step[j].tim = json_integer_value(json_array_get(jtmp, 1));
+					temp_data.stage[i].step[j].CollEnable = json_integer_value(json_array_get(jtmp, 2));
+					json_decref(jtmp);
+				}
+				
+				if(temp_data.stage[i].Type==StageByRepeat)	{
+					temp_data.stage[i].RepeatNum = json_integer_value(json_object_get(jtmp2,"Repeat"));
+				}
+				else if(temp_data.stage[i].Type==StageByContinue)	{//溶解曲线
+					temp_data.stage[i].T_Rate = json_integer_value(json_object_get(jtmp2,"T_Rate"));
+				}
+				else if(temp_data.stage[i].Type==StageByContinue)	{//溶解曲线
+					temp_data.stage[i].T_Inter = json_integer_value(json_object_get(jtmp2,"T_Inter"));
+					temp_data.stage[i].Const_Tim = json_integer_value(json_object_get(jtmp2,"Const_Tim"));
+				}
+			}
+		}
+		json_decref(jsubdata);		
+	}
+	json_decref(jsubdata1);
+	//解析样本信息
 	jsubdata = json_object_get(jdata,"Hole");
 	total = json_array_size(jsubdata);
 	for(i=0;i<total;i++)	{
@@ -169,7 +235,7 @@ int AnalysisLab_Jsonfile(const char *path)
 			strcpy(sample_data.hole[j].sample_t, json_string_value(json_object_get(jtmp,"sample")));			
 			strcpy(sample_data.hole[j].channel, json_string_value(json_object_get(jtmp,"ch")));
 		}
-	}	
+	}
 	json_decref(jtmp);
 	json_decref(jdata);
 	json_decref(jsubdata);

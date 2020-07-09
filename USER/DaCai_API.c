@@ -650,7 +650,7 @@ static u8  DaCai_BasicGraphHead(_UI_t *pUI)
 	return len;
 }	
 //清空基本绘图控件内容
-u8  DaCai_ClearBasicGraph(_UI_t *pUI)
+void  DaCai_ClearBasicGraph(_UI_t *pUI)
 {
 	u16 len;
 	len = DaCai_BasicGraphHead(pUI);

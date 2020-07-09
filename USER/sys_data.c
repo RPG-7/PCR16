@@ -112,7 +112,7 @@ void ResetLabDataDefault(void)
 void ResetStep(u8 stageid, u8 stepid)
 {
 	temp_data.stage[stageid].step[stepid].CollEnable = DEF_False;
-	temp_data.stage[stageid].step[stepid].temp = HOLE_TEMP_MAX;
+	temp_data.stage[stageid].step[stepid].temp = HOLE_TEMPDEFAULT;
 	temp_data.stage[stageid].step[stepid].tim = 60;
 }
 
@@ -151,7 +151,7 @@ void ResetTempDataDefault(void)
 {
 	u8 i;
 //	temp_data.HeatCoverEnable = DEF_True;
-	temp_data.HeatCoverTemp = 105;
+	temp_data.HeatCoverTemp = HEATCOVER_TEMPDEFAULT;
 	temp_data.StageNum = 0;
 	temp_data.CurStage = 0;
 	for(i=0;i<STAGE_MAX;i++)	{
@@ -162,7 +162,7 @@ void ResetTempDataDefault(void)
 //设置温度程序DNA值
 void ResetTempDataDNA(void)
 {
-	temp_data.HeatCoverTemp = 105;
+	temp_data.HeatCoverTemp = HEATCOVER_TEMPDEFAULT;
 	temp_data.StageNum = 2;
 	temp_data.CurStage = 0;
 	temp_data.stage[0].RepeatNum = 10;
@@ -174,7 +174,7 @@ void ResetTempDataDNA(void)
 	temp_data.stage[0].T_Inter = 0;//温度间隔
 	temp_data.stage[0].Const_Tim = 0;//恒温时间 s
 	temp_data.stage[0].step[0].CollEnable = DEF_False;
-	temp_data.stage[0].step[0].temp = HOLE_TEMP_MAX;
+	temp_data.stage[0].step[0].temp = HOLE_TEMPDEFAULT;
 	temp_data.stage[0].step[0].tim = 30;
 	temp_data.stage[0].step[1].CollEnable = DEF_True;
 	temp_data.stage[0].step[1].temp = 4500;
@@ -201,7 +201,7 @@ void ResetTempDataDNA(void)
 //设置温度程序RNA值
 void ResetTempDataRNA(void)
 {
-	temp_data.HeatCoverTemp = 105;
+	temp_data.HeatCoverTemp = HEATCOVER_TEMPDEFAULT;
 	temp_data.StageNum = 2;
 	temp_data.CurStage = 0;
 	temp_data.stage[0].RepeatNum = 10;
@@ -213,7 +213,7 @@ void ResetTempDataRNA(void)
 	temp_data.stage[0].T_Inter = 0;//温度间隔
 	temp_data.stage[0].Const_Tim = 0;//恒温时间 s
 	temp_data.stage[0].step[0].CollEnable = DEF_False;
-	temp_data.stage[0].step[0].temp = HOLE_TEMP_MAX;
+	temp_data.stage[0].step[0].temp = HOLE_TEMPDEFAULT;
 	temp_data.stage[0].step[0].tim = 30;
 	temp_data.stage[0].step[1].CollEnable = DEF_True;
 	temp_data.stage[0].step[1].temp = 4500;

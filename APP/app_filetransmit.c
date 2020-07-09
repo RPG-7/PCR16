@@ -200,8 +200,8 @@ static void download_start(transmit_ctrl_t *ptfile)
 			
 	split(ptfile->filepath, "/", buf, &num);
 	if(ptfile->trans_type == TransmitType_File)	{//下发文件类型为实验文件
-		if(num > 0)	{//创建子目录
-			sprintf(filepath, "%s%s/%s", USERPath, TmpFolderName, buf[0]);
+		if(num > 0)	{//创建目录 上位机创建的实验信息保存路径：./Tmp/Lab
+			sprintf(filepath, "%s%s/%s", USERPath, ServerLabFolderName, buf[0]);
 			f_mkdir((const char *)filepath);
 		}
 		else	{
