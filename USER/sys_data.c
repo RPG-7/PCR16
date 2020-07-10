@@ -256,6 +256,8 @@ void *user_malloc(size_t size)
 //÷ÿ∂®œÚuser_free
 void user_free(void* ptr)
 {
+	if(ptr == NULL)
+		return;
 	tlsf_free(UserMem, ptr);
 	ptr = NULL;
 }

@@ -61,7 +61,7 @@ u8 WriteLogToBuff(char *str)
 	OSQPost(spiflash.MSG_Q, &msg_pkt_spiflash);
 	return 1;
 }
-
+#include "json.h"
 static void TaskSPIFLASH(void * ppdata)
 {
 	u8 err;
@@ -79,9 +79,9 @@ static void TaskSPIFLASH(void * ppdata)
 		}
 	}
 	OSFlagPost(SysFlagGrp, (OS_FLAGS)FLAG_GRP_2, OS_FLAG_SET, &err);
-	
-//		WriteTempJsonFile();
-//	ReadTempJsonFile();
+	jansson_pack_test();
+	CreateLab_Jsonfile("1:/Tmp/test.json");
+//	AnalysisLab_Jsonfile("1:/Tmp/test.json");
 	for(;;)
 	{
 		msg = (message_pkt_t *)OSQPend(spiflash.MSG_Q, 0, &err);//

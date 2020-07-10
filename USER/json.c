@@ -65,11 +65,12 @@ int CreateLab_Jsonfile(const char *path)
 	int ret;
 	
 	jdata = json_object();	
+	jarr = json_array();
 	//实验属性
-	jsubdata = json_pack_ex(jsonerror,0,"{ss,ss,si,si,si}", "id", lab_data.id,"name",lab_data.name,"type",lab_data.type,"method",lab_data.method,"HoleNum",HOLE_NUM);
+//	jsubdata = json_pack_ex(jsonerror,0,"{ss,ss,si,si,si}", "id", lab_data.id,"name",lab_data.name,"type",lab_data.type,"method",lab_data.method,"HoleNum",HOLE_NUM);
+	jsubdata = json_pack("{ss,ss,si,si,si}", "id", lab_data.id,"name",lab_data.name,"type",lab_data.type,"method",lab_data.method,"HoleNum",HOLE_NUM);
 	json_object_set(jdata,"Lab",jsubdata);
 	//温度程序
-	jarr = json_array();
 	jsubdata1 = json_pack("{si}", "HeatCover", temp_data.HeatCoverTemp);
 
 	for(i=0;i<temp_data.StageNum;i++)	{
@@ -109,7 +110,10 @@ int CreateLab_Jsonfile(const char *path)
 		}
 	}
 	json_object_set(jdata,"Hole",jarr);
-	ret = json_dump_file(jdata, path, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
+//	ret = json_dump_file(jdata, path, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
+	json_out = json_dumps(jdata, JSON_INDENT(1)|JSON_PRESERVE_ORDER|JSON_ENSURE_ASCII);
+	SYS_PRINTF("out:%s", json_out);
+	user_free(json_out);
 	json_decref(jdata);
 	json_decref(jsubdata);
 	json_decref(jsubdata1);
@@ -168,7 +172,7 @@ int CreateLab_Jsonfile(const char *path)
 //解析温lab json文件
 int AnalysisLab_Jsonfile(const char *path)
 {
-	json_t *jtmp,*jtmp2,*jtmp3;
+	json_t *jtmp=NULL,*jtmp2=NULL,*jtmp3=NULL;
 	u8 i,j;
 	u16 total;
 
@@ -235,8 +239,8 @@ int AnalysisLab_Jsonfile(const char *path)
 			strcpy(sample_data.hole[j].sample_t, json_string_value(json_object_get(jtmp,"sample")));			
 			strcpy(sample_data.hole[j].channel, json_string_value(json_object_get(jtmp,"ch")));
 		}
+		json_decref(jtmp);
 	}
-	json_decref(jtmp);
 	json_decref(jdata);
 	json_decref(jsubdata);
 	return 0;
@@ -281,12 +285,12 @@ int arr2[4][4] = { {1,2,3,4}, {5,6,7,8}, {9,10,11,12}, {13,14,15,16} };
 void jansson_pack_test(void)
 {
 	/* Build an empty JSON object */
-	root = json_pack("{}");
-	
-	json_out = json_dumps(root, JSON_ENCODE_ANY);
-	SYS_PRINTF("out:%s", json_out);
-	json_decref(root);
-	user_free(json_out);
+//	root = json_pack("{}");
+//	
+//	json_out = json_dumps(root, JSON_ENCODE_ANY);
+//	SYS_PRINTF("out:%s", json_out);
+//	json_decref(root);
+//	user_free(json_out);
 	
 	/* Build the JSON object {"foo": 42, "bar": 7} */
 //	root = json_pack("{sisi}", "foo", 42, "bar", 7);
