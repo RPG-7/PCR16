@@ -100,16 +100,26 @@ float PIDControl(u8 id, s32 input_dat)
 	if(pPid->increment> pPid->OutputMax) {//消除积分饱和
 		if(pPid->diff <= 0)
 			iError = pPid->diff;
-		dInput = input_dat - pPid->LastInput;
-		pPid->PIterm -= P * dInput;
-		PIterm = pPid->PIterm;
+		if(absdiff<300)	{//与目标误差＜3度 启用比例抑制 消除超调
+			dInput = input_dat - pPid->LastInput;
+			pPid->PIterm -= P * dInput;
+			PIterm = pPid->PIterm;
+		}else {
+			pPid->PIterm = 0;
+			PIterm = P*pError;
+		}
 	}
     else if(pPid->increment < pPid->OutputMin) {
 		if(pPid->diff >= 0)
 			iError = pPid->diff;
-		dInput = input_dat - pPid->LastInput;//误差大于1度 启用比例抑制 消除超调
-		pPid->PIterm -= P * dInput;
-		PIterm = pPid->PIterm;
+		if(absdiff<300)	{//与目标误差＜3度 启用比例抑制 消除超调
+			dInput = input_dat - pPid->LastInput;
+			pPid->PIterm -= P * dInput;
+			PIterm = pPid->PIterm;
+		}else {
+			pPid->PIterm = 0;
+			PIterm = P*pError;
+		}
 	}
 	else {
 		iError = pPid->diff;

@@ -22,7 +22,7 @@ const char SampleChannel[][4] = {
 
 void SysDataInit(void)
 {
-	UserMem = tlsf_create_with_pool((void *)0x20012000, 0x4000);//内存0x12000 - 0x18000 区域24KB内存使用tlsf管理
+	UserMem = tlsf_create_with_pool((void *)0x20011000, 0x5000);//内存0x12000 - 0x18000 区域24KB内存使用tlsf管理
 	JsonMem = tlsf_create_with_pool((void *)0x20016000, 0x2000);
 	jansson_init();
 	SysError.Y1.ubyte = 0x0;//主板故障

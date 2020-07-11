@@ -187,50 +187,18 @@
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>229</LineNumber>
+          <LineNumber>74</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134347716</Address>
+          <Address>134348814</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\USER\rw_spiflash.c</Filename>
+          <Filename>..\BSP\retarget.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\PCR_CODE\../USER/rw_spiflash.c\229</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>43</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134306618</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\USER\rw_spiflash.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\PCR_CODE\../USER/rw_spiflash.c\43</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>230</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\USER\rw_spiflash.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression></Expression>
+          <Expression>\\PCR_CODE\../BSP/retarget.c\74</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -297,7 +265,7 @@
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>jdata</ItemText>
+          <ItemText>UserMem</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>

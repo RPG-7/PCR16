@@ -12,8 +12,8 @@ temp_ctrl_t TempCtrl[TEMPCTRL_NUM];
 #define	COVER_TECPWM_PLUSE		800
 #define	HOLE_TECPWM_MAX		62//TEC pwm占空比最大值
 #define	COVER_TECPWM_MAX		100//TEC pwm占空比最大值
-#define	HOLECTRL_ACCURACY		15//孔温控精度0.1
-#define	COVERCTRL_ACCURACY		100//热盖温控精度0.1
+#define	HOLECTRL_ACCURACY		10//孔温控精度±0.1
+#define	COVERCTRL_ACCURACY		100//热盖温控精度±1
 #define	TEMPCOLLECT_ACCURACY		5//温度采集精度 0.05
 static  message_pkt_t    msg_pkt_temp;
 static void AppTempTask (void *parg);
@@ -53,8 +53,8 @@ u8 StartAPPTempCtrl(void)
 	OSQPost(spiflash.MSG_Q, &msg_pkt_temp);	
 	OSTimeDly(500);
 //	if(temp_data.HeatCoverEnable)
-	SetTempCtrlTarget(COVER_ID, temp_data.HeatCoverTemp);//先开启热盖温控
-
+//	SetTempCtrlTarget(COVER_ID, temp_data.HeatCoverTemp);//先开启热盖温控
+	TempCtrl[HOLE_ID].enable = DEF_True;
 	return 1;
 }
 //实验停止温控
@@ -221,7 +221,7 @@ static void AppTempTask (void *parg)
 	StopTempCtrl(HOLE_ID);
 	StopTempCtrl(COVER_ID);
 	OSTimeDly(1000);
-	StartCoolFan(DEF_ON, 100-70);//打开制冷片风扇 默认50%占空比
+	StartCoolFan(DEF_ON, 100-68);//打开制冷片风扇 默认50%占空比
 	EquipFAN_OFF();//打开设备风扇
 
 	for(;;)
