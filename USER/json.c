@@ -6,7 +6,7 @@ char *json_out;
 
 void jansson_init(void)
 {
-	json_set_alloc_funcs(user_malloc, user_free);
+	json_set_alloc_funcs(json_malloc, json_free);
 }
 
 ////创建温度曲线json文件
@@ -72,7 +72,6 @@ int CreateLab_Jsonfile(const char *path)
 	json_object_set(jdata,"Lab",jsubdata);
 	//温度程序
 	jsubdata1 = json_pack("{si}", "HeatCover", temp_data.HeatCoverTemp);
-
 	for(i=0;i<temp_data.StageNum;i++)	{
 		jarr2 = json_array();
 		jsubdata = json_pack("{si}", "Type",temp_data.stage[i].Type);
@@ -110,10 +109,10 @@ int CreateLab_Jsonfile(const char *path)
 		}
 	}
 	json_object_set(jdata,"Hole",jarr);
-//	ret = json_dump_file(jdata, path, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
-	json_out = json_dumps(jdata, JSON_INDENT(1)|JSON_PRESERVE_ORDER|JSON_ENSURE_ASCII);
-	SYS_PRINTF("out:%s", json_out);
-	user_free(json_out);
+	ret = json_dump_file(jdata, path, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
+//	json_out = json_dumps(jdata, JSON_INDENT(1)|JSON_PRESERVE_ORDER|JSON_ENSURE_ASCII);
+//	SYS_PRINTF("out:%s", json_out);
+//	json_free(json_out);
 	json_decref(jdata);
 	json_decref(jsubdata);
 	json_decref(jsubdata1);
@@ -296,7 +295,7 @@ void jansson_pack_test(void)
 //	root = json_pack("{sisi}", "foo", 42, "bar", 7);
 	root = json_pack_ex(jsonerror,0,"{sisi}", "foo", 42, "bar", 5);
 
-	json_out = json_dumps(root, JSON_ENCODE_ANY);
+	json_out = json_dumps(root, JSON_INDENT(1)|JSON_PRESERVE_ORDER);
 	SYS_PRINTF("out:%s", json_out);
 	json_decref(root);
 	user_free(json_out);

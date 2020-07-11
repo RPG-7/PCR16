@@ -5,6 +5,7 @@ _sys_t Sys;
 _syserror_t SysError;
 RTC_TIME_ST SysTime;
 tlsf_t UserMem;
+tlsf_t JsonMem;
 
 _sample_data_t sample_data;
 _lab_data_t	lab_data;
@@ -21,7 +22,8 @@ const char SampleChannel[][4] = {
 
 void SysDataInit(void)
 {
-	UserMem = tlsf_create_with_pool((void *)0x20012000, 0x6000);//内存0x12000 - 0x18000 区域24KB内存使用tlsf管理
+	UserMem = tlsf_create_with_pool((void *)0x20012000, 0x4000);//内存0x12000 - 0x18000 区域24KB内存使用tlsf管理
+	JsonMem = tlsf_create_with_pool((void *)0x20016000, 0x2000);
 	jansson_init();
 	SysError.Y1.ubyte = 0x0;//主板故障
 	SysError.Y2.ubyte = 0x0;//
@@ -41,9 +43,6 @@ void SysDataInit(void)
 	ResetLabDataDefault();
 	ResetSampleDataDefault();
 	ResetTempDataDefault();
-//	CreateTemp_Jsonfile();
-//	CreateLab_Jsonfile();
-//	jansson_pack_test();
 }
 //设置样本类型
 void SetSampleType(u32 enable, char typeidx)
@@ -259,5 +258,20 @@ void user_free(void* ptr)
 	if(ptr == NULL)
 		return;
 	tlsf_free(UserMem, ptr);
+	ptr = NULL;
+}
+
+void *json_malloc(size_t size)
+{
+	void *ret;
+	ret = tlsf_malloc(JsonMem, size);
+	return ret;
+}
+//重定向user_free
+void json_free(void* ptr)
+{
+	if(ptr == NULL)
+		return;
+	tlsf_free(JsonMem, ptr);
 	ptr = NULL;
 }

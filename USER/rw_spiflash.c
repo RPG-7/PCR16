@@ -36,8 +36,7 @@ int FlashFSInit(void)
 	FRESULT res;
 	u32 disk_tot, disk_free;
 	
-	flashfs.fs = (FATFS *)user_malloc(sizeof(FATFS));
-	flashfs.fil = (FIL *)user_malloc(sizeof(FIL));
+	flashfs.fs = (FATFS *)user_malloc(sizeof(FATFS));	
 #if FORMAT_DISK == 0	
 	
 	res = f_mount(flashfs.fs, USERPath, 1);
@@ -77,6 +76,7 @@ int FlashFSInit(void)
 #if FORMAT_DISK == 0
 	}
 #endif
+	flashfs.fil = (FIL *)user_malloc(sizeof(FIL));
 	GetFlashSpace(&disk_tot, &disk_free);
 	BSP_PRINTF("SPI Flash Space:");
 	BSP_PRINTF("    %u KiB total drive space.\n    %u KiB available.\n", disk_tot, disk_free);

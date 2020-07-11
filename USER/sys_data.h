@@ -178,6 +178,8 @@ extern _hole_pos_t HolePos;
 
 void *user_malloc(size_t size);
 void user_free(void* ptr);	
+void *json_malloc(size_t size);
+void json_free(void* ptr);	
 void SysDataInit(void);
 void HeatCoverOnOff(u8 flag);
 void CollDataOnOff_InStep(u8 flag);

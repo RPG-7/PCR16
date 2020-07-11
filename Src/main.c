@@ -112,6 +112,8 @@ __set_PRIMASK(1);//¹Ø±Õ×ÜÖÐ¶Ï
   /* USER CODE BEGIN 2 */
   SYS_PRINTF("APP Startup. Ver:%s", CONFIG_SYSINFO_FW_Version);
 LED_GREEN_ON();
+//jansson_pack_test();
+//CreateLab_Jsonfile();
 CreatMainTask();
   /* USER CODE END 2 */
 

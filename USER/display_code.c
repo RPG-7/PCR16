@@ -516,7 +516,7 @@ void DisplayTempProgramUI(u8 page_flag, u8 clear_flag)
 		}
 	}
 	pMultiTXT_t->data[i].id = 6;
-	pMultiTXT_t->data[i].len = sprintf(pMultiTXT_t->data[i].buf, "%d", temp_data.HeatCoverTemp);
+	pMultiTXT_t->data[i].len = sprintf(pMultiTXT_t->data[i].buf, "%d", temp_data.HeatCoverTemp/100);
 
 	stage_id = 14;repeat_id = 23;
 	j = CurIdx.StageIdx;

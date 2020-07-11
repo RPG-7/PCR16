@@ -30,8 +30,8 @@ static void TempDatInit(void)
 	TempCtrl[HOLE_ID].TimCH = TIM_CHANNEL_1;
 	TempCtrl[HOLE_ID].TimPluse = HOLE_TECPWM_PLUSE;
 	TempCtrl[HOLE_ID].DutyMax = HOLE_TECPWM_MAX;
-	TempCtrl[HOLE_ID].TempMin = HOLE_TEMPMIN;
-	TempCtrl[HOLE_ID].TempMax = HOLE_TEMPMAX;
+	TempCtrl[HOLE_ID].TempMin = HOLE_TEMPMIN;//温度最小值
+	TempCtrl[HOLE_ID].TempMax = HOLE_TEMPMAX;//温度最大值
 	SetPIDOutputLimits(PID_ID1, -HOLE_TECPWM_MAX, HOLE_TECPWM_MAX);//设置PID控制输出上下限
 	SetPIDVal(PID_ID1, P1_PARAM, I1_PARAM, D1_PARAM);//设置PID 参数
 	
@@ -41,8 +41,8 @@ static void TempDatInit(void)
 	TempCtrl[COVER_ID].TimCH = TIM_CHANNEL_4;
 	TempCtrl[COVER_ID].TimPluse = COVER_TECPWM_PLUSE;
 	TempCtrl[COVER_ID].DutyMax = COVER_TECPWM_MAX;
-	TempCtrl[COVER_ID].TempMin = HEATCOVER_TEMPMIN;
-	TempCtrl[COVER_ID].TempMax = HEATCOVER_TEMPMAX;
+	TempCtrl[COVER_ID].TempMin = HEATCOVER_TEMPMIN;//温度最小值
+	TempCtrl[COVER_ID].TempMax = HEATCOVER_TEMPMAX;//温度最大值
 	SetPIDOutputLimits(PID_ID2, 0, COVER_TECPWM_MAX);//设置PID控制输出上下限
 	SetPIDVal(PID_ID2, P2_PARAM, I2_PARAM, D2_PARAM);//设置PID 参数
 }
@@ -110,7 +110,7 @@ static void TempControl(u8 id, u16 cur_t)
 	}
 	temp = PIDControl(pTempCtrl->PIDid, cur_t);//PID 调节 增量算法
 	dat = (s16)temp;
-	if(id == HOLE_ID)	{
+	if(id == HOLE_ID)	{//模块
 		if(dat<0)	{//当前温度高于目标温度 将TEC切换到制冷模式 快速降温
 			TEC_DIR_COLD();
 		}
@@ -118,7 +118,7 @@ static void TempControl(u8 id, u16 cur_t)
 			TEC_DIR_HOT();
 		}
 	}
-	else	{
+	else	{//热盖
 		if(dat<0)	{
 			dat = 0;
 		}

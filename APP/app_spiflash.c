@@ -79,8 +79,8 @@ static void TaskSPIFLASH(void * ppdata)
 		}
 	}
 	OSFlagPost(SysFlagGrp, (OS_FLAGS)FLAG_GRP_2, OS_FLAG_SET, &err);
-	jansson_pack_test();
-	CreateLab_Jsonfile("1:/Tmp/test.json");
+
+//	CreateLab_Jsonfile("1:/Tmp/test.json");
 //	AnalysisLab_Jsonfile("1:/Tmp/test.json");
 	for(;;)
 	{
