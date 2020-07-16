@@ -54,7 +54,7 @@ enum devstate	{
 //设备运行子模式
 enum devsubstate	{
 	DevSubState_TempUp=0,//温度上升中
-	DevSubState_TempDown=1,//温度下降中
+	DevSubState_TempDn=1,//温度下降中
 	DevSubState_TempKeep=2,//温度保持中
 	DevSubState_CollectFluo=3,//荧光采集中
 	DevSubState_DebugTemp = 4,

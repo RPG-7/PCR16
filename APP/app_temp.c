@@ -10,8 +10,8 @@ _app_temp_t app_temp;
 temp_ctrl_t TempCtrl[TEMPCTRL_NUM];
 #define	HOLE_TECPWM_PLUSE		400
 #define	COVER_TECPWM_PLUSE		800
-#define	HOLE_TECPWM_MAX		62//TEC pwm占空比最大值
-#define	COVER_TECPWM_MAX		100//TEC pwm占空比最大值
+#define	HOLE_TECPWM_MAX		52//TEC pwm占空比最大值
+#define	COVER_TECPWM_MAX		80//TEC pwm占空比最大值
 #define	HOLECTRL_ACCURACY		10//孔温控精度±0.1
 #define	COVERCTRL_ACCURACY		100//热盖温控精度±1
 #define	TEMPCOLLECT_ACCURACY		5//温度采集精度 0.05
@@ -53,8 +53,8 @@ u8 StartAPPTempCtrl(void)
 	OSQPost(spiflash.MSG_Q, &msg_pkt_temp);	
 	OSTimeDly(500);
 //	if(temp_data.HeatCoverEnable)
-//	SetTempCtrlTarget(COVER_ID, temp_data.HeatCoverTemp);//先开启热盖温控
-	TempCtrl[HOLE_ID].enable = DEF_True;
+	SetTempCtrlTarget(COVER_ID, temp_data.HeatCoverTemp);//先开启热盖温控
+//	TempCtrl[HOLE_ID].enable = DEF_True;
 	return 1;
 }
 //实验停止温控
@@ -92,6 +92,18 @@ static void StartTECPWM(temp_ctrl_t *pTempCtrl, u8 duty)
 		temp += 1;
 	}
 	StartPWM(pTempCtrl->pTECPWM, pTempCtrl->TimCH, temp);
+}
+//风扇控制：flag 开关，duty pwm占空比
+static void StartCoolFan(u8 flag, u8 duty)
+{
+	u32 temp;
+	
+	if(flag==DEF_ON)	{
+		temp = (80*duty)/100;
+		StartPWM(&htim4, TIM_CHANNEL_3, temp);
+	}
+	else if(flag==DEF_OFF)
+		StopPWM(&htim4, TIM_CHANNEL_3);
 }
 u16 setval;
 //模块和孔温度调节 PID增量算法
@@ -143,6 +155,7 @@ static void ConstantTempArrivedCallback(void)
 			temp_data.CurStage++;
 			if(temp_data.CurStage>=temp_data.StageNum)	{//达到最后一个阶段 停止控温
 				Sys.devstate = DevState_IDLE;
+				BSP_PRINTF("Lab complate,Stop.");
 			}else	{
 				m = temp_data.CurStage;
 				temp_data.stage[m].CurStep=0;
@@ -166,7 +179,7 @@ static void PD_DataCollectCallback(void)
 static void TempProgramLookOver(s16 c_temp)
 {
 	u8 m,n;
-	s16 target;
+	s16 target,diff;
 	static u8 ConstantTempCnt;
 	
 	if(Sys.devstate != DevState_Running)//只有实验情况下 才开启温度程序巡视
@@ -176,16 +189,20 @@ static void TempProgramLookOver(s16 c_temp)
 	m = temp_data.CurStage;
 	n = temp_data.stage[m].CurStep;
 	target = temp_data.stage[m].step[n].temp;
-	if(abs(c_temp-target)>HOLECTRL_ACCURACY)	{//温度差大于0.15度 当前处于升/降温阶段		
-		ConstantTempCnt = 0;
-		SetPIDTarget(PID_ID1, target);//设置目标温度 开启控温
-//		hengwenflag = 0;
-		Sys.devsubstate = DevSubState_TempUp;
+	diff = c_temp-target;
+	if(diff>100)	{//降温阶段
+		Sys.devsubstate = DevSubState_TempDn;
+		StartCoolFan(DEF_ON, 100-70);//打开风扇 加快降温
 	}
-	else {//到达目标温度 当前处于恒温阶段
+	else if(diff<=-100)	{//升温阶段
+		Sys.devsubstate = DevSubState_TempUp;
+		StartCoolFan(DEF_ON, 100);//关闭风扇
+	}
+	if(abs(diff)<=HOLECTRL_ACCURACY)	{//到达目标温度 当前处于恒温阶段	
 		ConstantTempCnt++;
 		if(ConstantTempCnt>=5)	{//持续400ms 温度差小于0.2度 判断温度控制已稳定
 			Sys.devsubstate = DevSubState_TempKeep;//恒温阶段
+			StartCoolFan(DEF_ON, 100);//关闭风扇
 			ConstantTempCnt = 0;
 			if(GetSoftTimerState(&SoftTimer1)==DEF_Stop)	{//100ms 为单位
 				SoftTimerStart(&SoftTimer1, temp_data.stage[m].step[n].tim*10, DEF_True); //设置恒温时间定时
@@ -195,21 +212,12 @@ static void TempProgramLookOver(s16 c_temp)
 					SoftTimer2.pCallBack = &PD_DataCollectCallback;
 				}
 			}
-//			hengwenflag = target;
 		}
 	}
-}
-//风扇控制：flag 开关，duty pwm占空比
-static void StartCoolFan(u8 flag, u8 duty)
-{
-	u32 temp;
-	
-	if(flag==DEF_ON)	{
-		temp = (80*duty)/100;
-		StartPWM(&htim4, TIM_CHANNEL_3, temp);
+	else	{//温度差大于0.1度 当前处于升/降温阶段		
+		ConstantTempCnt = 0;
+		SetPIDTarget(PID_ID1, target);//设置目标温度 开启控温
 	}
-	else if(flag==DEF_OFF)
-		StopPWM(&htim4, TIM_CHANNEL_3);
 }
 
 static void AppTempTask (void *parg)
@@ -221,7 +229,7 @@ static void AppTempTask (void *parg)
 	StopTempCtrl(HOLE_ID);
 	StopTempCtrl(COVER_ID);
 	OSTimeDly(1000);
-	StartCoolFan(DEF_ON, 100-68);//打开制冷片风扇 默认50%占空比
+	StartCoolFan(DEF_ON, 100);//打开制冷片风扇 默认50%占空比
 	EquipFAN_OFF();//打开设备风扇
 
 	for(;;)
@@ -252,11 +260,11 @@ static void AppTempTask (void *parg)
 			}else	{
 				SysError.Y1.bits.b5 = DEF_Inactive;
 			}
-//			if(CalcTemperature(GetADCVol(TEMP_ID4), (s32 *)&cur_temp)==0)	{//散热器 预留
-//				app_temp.current_t[TEMP_ID4] = cur_temp;				
-//			}else	{
-//			
-//			}
+			if(CalcTemperature(GetADCVol(TEMP_ID4), (s32 *)&cur_temp)==0)	{//散热器 预留
+				app_temp.current_t[TEMP_ID4] = cur_temp;				
+			}else	{
+			
+			}
 		}
 		else
 		{
